@@ -1,0 +1,80 @@
+﻿Version=1.8
+IconFile=
+NumberOfModules=0
+Build1=Default,b4i.examples.calculator
+NumberOfFiles=1
+File1=Main.bil
+NumberOfLibraries=1
+Library1=icore
+@EndOfDesignText@
+'Code module
+#Region  Project Attributes 
+	#ApplicationLabel: 四則計算機
+	#Version: 1.0.0 
+	'Orientation possible values: Portrait, LandscapeLeft, LandscapeRight and PortraitUpsideDown
+	#iPhoneOrientations: Portrait, LandscapeLeft, LandscapeRight
+	#iPadOrientations: Portrait, LandscapeLeft, LandscapeRight, PortraitUpsideDown
+#End Region
+
+Sub Process_Globals
+    Public App As Application
+    Public NavControl As NavigationController
+    Private Page1 As Page
+    Private lblOutput As Label
+    Private pkrOp As Picker
+    Private swhDivide As Switch
+    Private txtOpd1 As TextField
+    Private txtOpd2 As TextField
+    Private opIndex As Int
+End Sub
+
+Private Sub Application_Start (Nav As NavigationController)
+    NavControl = Nav
+    Page1.Initialize("Page1")
+    Page1.RootPanel.Color = Colors.White
+    Page1.RootPanel.LoadLayout("Main")
+    Page1.Title = "四則計算機"
+    NavControl.ShowPage(Page1)
+    pkrOp.SetItems(0, Array As String("+","-","*","/"))
+    opIndex = 0
+    pkrOp.SelectRow(0, opIndex, True)
+    pkrOp.SetRowsHeight(50)
+End Sub
+
+Private Sub Page1_Resize(Width As Int, Height As Int)
+End Sub
+
+Private Sub Application_Background
+End Sub
+
+Sub pkrOp_ItemSelected (Column As Int, Row As Int)
+    opIndex = Row  ' 取得選擇的運算子索引
+End Sub
+
+Sub btnCal_Click
+    Dim opd1, opd2 As Int
+    Dim result As Double = 0.0
+    opd1 = txtOpd1.Text  ' 取得2個運算元
+    opd2 = txtOpd2.Text
+    Select opIndex
+       Case 0:  ' 加
+          result = opd1 + opd2
+       Case 1:  ' 減
+          result = opd1 - opd2
+       Case 2:  ' 乘
+          result = opd1 * opd2  
+       Case 3:  ' 除
+          If swhDivide.Value Then
+              result = IntDivide(opd1, opd2) ' 整數除法
+          Else
+              result = opd1 / opd2
+          End If
+    End Select 
+    lblOutput.Text = "運算結果: " & result
+End Sub
+
+Sub IntDivide(Op1 As Int, Op2 As Int) As Int
+    Dim Result As Int
+    Result = Op1 / Op2
+    Return Result
+End Sub

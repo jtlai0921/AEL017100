@@ -1,0 +1,64 @@
+﻿Version=1.8
+IconFile=
+NumberOfModules=0
+Build1=Default,b4i.examples.bmi2
+NumberOfFiles=2
+File1=Main.bil
+File2=Result.bil
+NumberOfLibraries=1
+Library1=icore
+@EndOfDesignText@
+'Code module
+#Region  Project Attributes 
+	#ApplicationLabel: BMI計算機II
+	#Version: 1.0.0 
+	'Orientation possible values: Portrait, LandscapeLeft, LandscapeRight and PortraitUpsideDown
+	#iPhoneOrientations: Portrait, LandscapeLeft, LandscapeRight
+	#iPadOrientations: Portrait, LandscapeLeft, LandscapeRight, PortraitUpsideDown
+#End Region
+
+Sub Process_Globals
+    Public App As Application
+    Public NavControl As NavigationController
+    Private Page1, Page2 As Page
+    Private lblOutput As Label
+    Private txtHeight As TextField
+    Private txtWeight As TextField
+End Sub
+
+Private Sub Application_Start (Nav As NavigationController)
+    NavControl = Nav
+    Page1.Initialize("Page1")
+    Page1.RootPanel.Color = Colors.White
+    Page1.RootPanel.LoadLayout("Main")
+    Page1.Title = "BMI計算機II"
+    Page2.Initialize("Page2")
+    Page2.RootPanel.Color = Colors.White
+    Page2.RootPanel.LoadLayout("Result")
+    Page2.Title = "BMI計算結果"
+    NavControl.ShowPage(Page1)  ' 顯示Page1頁面
+End Sub
+
+Private Sub Page1_Resize(Width As Int, Height As Int)
+End Sub
+
+Private Sub Page2_Resize(Width As Int, Height As Int)
+End Sub
+
+Private Sub Application_Background
+End Sub
+
+' Page1頁面btnBMI按鈕的事件處理
+Sub btnBMI_Click
+    Dim result As Double
+    Dim h As Double = txtHeight.Text / 100.0
+    Dim w As Double = txtWeight.Text
+    result = w / (h * h)        ' 計算BMI值
+    NavControl.ShowPage(Page2)  ' 顯示Page2頁面
+    ' 在Page2頁面顯示BMI值
+	lblOutput.Text = "BMI值：" & result
+End Sub
+' Page2頁面btnReturn按鈕的事件處理
+Sub btnReturn_Click
+    NavControl.ShowPage(Page1)  ' 顯示Page1頁面
+End Sub

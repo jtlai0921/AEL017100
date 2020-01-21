@@ -1,0 +1,36 @@
+﻿Version=1.8
+IconFile=
+NumberOfModules=2
+Module1=Page1Module
+Module2=Page2Module
+Build1=Default,b4i.examples.bmi3
+NumberOfFiles=2
+File1=Main.bil
+File2=Result.bil
+NumberOfLibraries=1
+Library1=icore
+@EndOfDesignText@
+'Code module
+#Region  Project Attributes 
+	#ApplicationLabel: BMI計算機III
+	#Version: 1.0.0 
+	'Orientation possible values: Portrait, LandscapeLeft, LandscapeRight and PortraitUpsideDown
+	#iPhoneOrientations: Portrait, LandscapeLeft, LandscapeRight
+	#iPadOrientations: Portrait, LandscapeLeft, LandscapeRight, PortraitUpsideDown
+#End Region
+
+Sub Process_Globals
+    Public App As Application
+    Public NavControl As NavigationController
+End Sub
+
+Private Sub Application_Start (Nav As NavigationController)
+    NavControl = Nav	
+    Page1Module.ShowPage1()
+End Sub
+
+Private Sub Application_Background
+	
+End Sub
+
+

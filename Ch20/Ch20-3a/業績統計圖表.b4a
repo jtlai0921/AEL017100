@@ -1,0 +1,64 @@
+﻿Version=3.82
+IconFile=
+NumberOfModules=2
+Module1=PieChart
+Module2=PieChartModule
+Build1=Default,ch20.gui.b4a.example
+DoNotOverwriteManifest=False
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.basic4ppc.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="14"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~
+NumberOfFiles=1
+File1=Main.bal
+NumberOfLibraries=1
+Library1=core
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: 業績統計圖表
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+
+End Sub
+
+Sub Globals
+    Dim txtQ1 As EditText
+    Dim txtQ2 As EditText
+    Dim txtQ3 As EditText
+    Dim txtQ4 As EditText
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+    Activity.LoadLayout("Main")
+    Activity.Title = "業績統計圖表"
+    txtQ1.Text = "234"
+    txtQ2.Text = "256"
+    txtQ3.Text = "453"
+    txtQ4.Text = "512"
+End Sub
+
+Sub Activity_Resume
+
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+Sub Button1_Click
+    PieChart.Q1 = txtQ1.Text
+    PieChart.Q2 = txtQ2.Text
+    PieChart.Q3 = txtQ3.Text
+    PieChart.Q4 = txtQ4.Text
+    StartActivity(PieChart)  ' 啟動PieChart活動
+End Sub

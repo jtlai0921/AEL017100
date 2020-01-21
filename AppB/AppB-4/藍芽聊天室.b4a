@@ -1,0 +1,196 @@
+﻿Version=3.2
+IconFile=
+NumberOfModules=1
+Module1=ChatActivity
+ModuleVisible1=1
+Package=appb_4.gui.b4a.example
+DoNotOverwriteManifest=False
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.basic4ppc.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="14"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~
+UserTypesHint=NameMac
+NumberOfFiles=2
+File1=chat.bal
+File2=main.bal
+NumberOfLibraries=3
+Library1=core
+Library2=randomaccessfile
+Library3=serial
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: 藍芽聊天室
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: unspecified
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
+Sub Process_Globals
+    Dim bluAdmin As BluetoothAdmin
+    Dim bluSPP As Serial
+    Dim btDevices As List
+    Type NameMac (name As String, mac As String)
+    Dim connected As Boolean
+    Dim searchInProgress As Boolean
+End Sub
+
+Sub Globals
+    Dim spnrPairedDevices As Spinner
+    Dim btnConnectBT As Button
+    Dim lblBTStatus As Label
+    Dim btnBTScan As Button
+    Dim btnAllowConnection As Button
+    Dim btnDisconnectBT As Button
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+    If FirstTime Then
+        btDevices.Initialize()       ' 初始List物件
+        bluAdmin.Initialize("Admin") ' 初始BluetoothAdmin物件
+        bluSPP.Initialize("Serial1") ' 初始Serial物件	    
+        FindPairedDevices
+    End If
+    Activity.LoadLayout("Main")
+    Activity.Title = "藍芽聊天室"
+	connected = False
+End Sub
+
+Sub Activity_Resume
+    UpdateSpinnerItem
+	' 如果藍芽沒有啟用, 就啟用藍芽
+    If bluAdmin.IsEnabled = False Then
+        If bluAdmin.Enable = False Then 
+            ToastMessageShow("啟用藍芽錯誤...", True)
+        Else ' 同時觸發Admin_StateChanged事件
+            ToastMessageShow("啟用藍芽...", False)  
+        End If
+    End If
+    UpdateUI    ' 更新介面
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+' 取得配對裝置清單
+Sub FindPairedDevices
+    btDevices.Clear()     ' 清除裝置清單
+    ' 取得配對裝置
+    Dim pairedDevices As Map = bluSPP.GetPairedDevices
+    For i = 0 To pairedDevices.Size - 1  ' 新增配對裝置
+        Dim nm As NameMac
+        nm.Initialize()
+        nm.mac = pairedDevices.GetValueAt(i)
+        nm.name = pairedDevices.GetKeyAt(i)
+        btDevices.Add(nm)  ' 新增至裝置清單
+    Next
+End Sub
+' 更新Spinner元件項目
+Sub UpdateSpinnerItem
+    spnrPairedDevices.Clear()      ' 清除Spinner元件的項目
+    For Each nm As NameMac In btDevices   ' 新增配對裝置至Spinner元件
+        spnrPairedDevices.Add(nm.name)
+    Next 
+End Sub 
+' 藍芽狀態改變
+Sub Admin_StateChanged(NewState As Int, OldState As Int)
+    FindPairedDevices
+	UpdateSpinnerItem
+    UpdateUI
+End Sub
+' 更新使用介面
+Public Sub UpdateUI
+    If bluAdmin.IsEnabled = False Then  ' BluetoothAdmin不可用
+        btnBTScan.Enabled = False
+    Else
+        btnBTScan.Enabled = True
+    End If	' 沒有配對裝置
+    If spnrPairedDevices.Size = 0 Then
+        btnConnectBT.Enabled = False
+    End If	
+    If searchInProgress Then     ' 正在搜尋
+        btnConnectBT.Enabled = False   
+    End If    
+	If connected Then    ' 是否已經連接
+        btnConnectBT.Enabled = False
+        btnDisconnectBT.Enabled = True
+    Else 
+        btnConnectBT.Enabled = True
+        btnDisconnectBT.Enabled = False
+    End If
+End Sub
+' 連接藍芽裝置
+Sub btnConnectBT_Click
+    ' 沒有選擇裝置
+    If spnrPairedDevices.SelectedIndex = -1 Then Return
+    Dim nm As NameMac = btDevices.Get(spnrPairedDevices.SelectedIndex)
+    bluSPP.Connect(nm.mac)  ' 建立藍芽連接
+    lblBTStatus.Text = "正在連接藍芽裝置..."
+    btnConnectBT.Enabled = False
+End Sub
+' 已經成功連接藍芽裝置
+Sub Serial1_Connected(Success As Boolean)
+    If Success = False Then    ' 失敗
+        ToastMessageShow("藍芽連接錯誤: " & LastException.Message, True)
+        lblBTStatus.Text = "藍芽連接錯誤..."
+        btnConnectBT.Enabled = True
+        connected = False
+    Else                       ' 成功
+        lblBTStatus.Text = "成功建立藍芽連接..."
+        btnConnectBT.Enabled = False
+        btnDisconnectBT.Enabled = True
+        connected = True
+        StartActivity("ChatActivity")
+    End If
+End Sub
+' 中斷藍芽連接
+Sub btnDisconnectBT_Click
+    bluSPP.Disconnect()   ' 中斷連接
+    btnConnectBT.Enabled = True
+    btnDisconnectBT.Enabled = False
+    lblBTStatus.Text = "藍芽連接已經中斷..."
+End Sub
+' 允許裝置可被檢視
+Sub btnAllowConnection_Click
+    ' 允許裝置可被檢視300秒
+    Dim i As Intent
+    i.Initialize("android.bluetooth.adapter.action.REQUEST_DISCOVERABLE", "")
+    i.PutExtra("android.bluetooth.adapter.extra.DISCOVERABLE_DURATION", 300)
+    StartActivity(i)
+    bluSPP.Listen()  ' 傾聽其他裝置的連接
+End Sub
+' 搜尋藍芽裝置
+Sub btnBTScan_Click
+    spnrPairedDevices.Clear()  ' 清除項目
+    btDevices.Clear()
+    If bluAdmin.StartDiscovery	= False Then 
+        ToastMessageShow("搜尋藍芽裝置錯誤...", True)
+    Else
+        searchInProgress = True
+        lblBTStatus.Text = "正在搜尋藍芽裝置..."
+        UpdateUI
+    End If
+End Sub
+' 完成藍芽裝置搜尋
+Sub Admin_DiscoveryFinished
+    searchInProgress = False
+    If spnrPairedDevices.Size = 0 Then
+        lblBTStatus.Text = "沒有找到任何藍芽裝置..."
+    Else
+        lblBTStatus.Text = "共找到(" & spnrPairedDevices.Size & ")個藍芽裝置..."
+    End If
+    UpdateUI
+End Sub
+' 找到藍芽裝置的事件處理
+Sub Admin_DeviceFound(Name As String, MacAddress As String)
+    spnrPairedDevices.Add(Name)
+    Dim nm As NameMac
+    nm.Initialize()
+    nm.Name = Name  
+    nm.mac = MacAddress
+    btDevices.Add(nm)
+    lblBTStatus.Text = "已經找到(" & btDevices.Size & ")個藍芽裝置..."
+End Sub
